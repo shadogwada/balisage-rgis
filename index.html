@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8">
+<title>Feuille de balisage — RGIS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1D4153; --ink-soft:#4C6675; --paper:#F7F5F2; --panel:#FFFFFF; --line:#DDDAD4;
+    --accent:#DC263F; --accent-soft:#FBE1E5; --ok:#3E7D53; --ok-soft:#E1F0E5; --warn:#B8862B; --warn-soft:#F8EBD0; --bad:#DC263F;
+    --mono:'IBM Plex Mono', ui-monospace, monospace; --disp:'Sora', 'Helvetica Neue', Arial, sans-serif;
+    --body:'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);}
+  ::selection{background:var(--accent-soft);}
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+  @media (max-width:860px){.app{grid-template-columns:1fr;}}
+  .rail{background:var(--ink);color:#EDE7DA;padding:24px 18px;position:sticky;top:0;height:100vh;overflow:auto;}
+  @media (max-width:860px){.rail{position:relative;height:auto;padding:16px;}}
+  .rail-brand{font-family:var(--disp);font-weight:700;font-size:19px;display:flex;align-items:center;gap:10px;margin-bottom:4px;color:#fff;}
+  .rail-brand sup{font-size:9px;}
+  .rail-brand .divider{width:1px;align-self:stretch;background:rgba(255,255,255,.35);}
+  .rail-brand .product{font-weight:600;font-size:13px;color:#DDDAD4;}
+  .rail-sub{font-family:var(--mono);font-size:11px;color:#9FB2BC;margin-bottom:22px;letter-spacing:.03em;}
+  .steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;}
+  @media (max-width:860px){.steps{flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:4px;} .step-btn .lbl small{display:none!important;} .rail-foot{display:none;}}
+  .step-btn{width:100%;text-align:left;background:none;border:none;color:#C7D2D7;padding:11px 10px;border-radius:6px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;font-family:var(--body);font-size:13.5px;white-space:nowrap;}
+  .step-btn:hover{background:rgba(255,255,255,.08);}
+  .step-btn.active{background:rgba(255,255,255,.12);color:#fff;}
+  .step-btn.active .num{background:var(--accent);color:#fff;}
+  .step-btn .num{font-family:var(--mono);font-size:11px;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px;}
+  .step-btn .lbl small{display:block;color:#8FA3AC;font-size:10.5px;margin-top:1px;}
+  .rail-foot{margin-top:28px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15);font-size:11px;color:#9FB2BC;font-family:var(--mono);line-height:1.6;}
+  .main{padding:36px 44px 90px;max-width:960px;}
+  @media (max-width:860px){.main{padding:20px 16px 90px;}}
+  .topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px;}
+  .topline-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .save-indicator{font-family:var(--mono);font-size:10.5px;color:var(--ok);opacity:0;transition:opacity .3s;}
+  .save-indicator.show{opacity:1;}
+  h1.page-title{font-family:var(--disp);font-size:26px;margin:2px 0 10px;padding-bottom:10px;font-weight:600;border-bottom:1.5px solid var(--line);}
+  .page-desc{color:var(--ink-soft);font-size:14px;margin-bottom:26px;max-width:62ch;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px 24px;margin-bottom:18px;}
+  @media (max-width:620px){.card{padding:16px 14px;}}
+  .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap;}
+  .card h2{font-family:var(--disp);font-size:15px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px;}
+  .card-head h2{margin:0;}
+  .card .hint{font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  @media (max-width:620px){.grid2,.grid3{grid-template-columns:1fr;}}
+  label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;}
+  input[type=text],input[type=date],input[type=number],textarea,select{width:100%;font-family:var(--body);font-size:15px;padding:10px;border:1px solid var(--line);border-radius:6px;background:#FCFBF8;color:var(--ink);}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);background:#fff;}
+  textarea{resize:vertical;min-height:52px;}
+  input:disabled{background:#EFEDE9;color:#9AA6AB;cursor:not-allowed;border-style:dashed;}
+  .field{margin-bottom:14px;}
+  .pillgroup{display:flex;gap:8px;flex-wrap:wrap;}
+  .pill{font-size:13px;padding:8px 13px;border:1px solid var(--line);border-radius:20px;cursor:pointer;background:#fff;user-select:none;color:var(--ink-soft);font-family:var(--body);}
+  .pill.on-ok{background:var(--ok);border-color:var(--ok);color:#fff;}
+  .pill.on-warn{background:var(--warn);border-color:var(--warn);color:#fff;}
+  .pill.on-ko{background:var(--bad);border-color:var(--bad);color:#fff;}
+  .sect-badge{font-family:var(--mono);font-size:10.5px;background:var(--ink);color:#fff;padding:3px 8px;border-radius:4px;}
+  .row-remove{background:none;border:none;color:var(--bad);cursor:pointer;font-size:12px;font-family:var(--mono);padding:6px;}
+  .add-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:1.5px dashed var(--line);color:var(--ink-soft);padding:10px 14px;border-radius:7px;cursor:pointer;font-size:13px;font-family:var(--body);width:100%;justify-content:center;margin-top:8px;}
+  .add-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .add-btn.strong{border-color:var(--ink);color:var(--ink);font-weight:600;}
+  /* balisage table */
+  .btable{width:100%;border-collapse:separate;border-spacing:0 6px;}
+  .btable th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);text-align:left;padding:0 6px;font-weight:600;}
+  .btable td{padding:0 4px;vertical-align:middle;}
+  .btable input{padding:9px 8px;}
+  .calc{font-family:var(--mono);font-size:13px;text-align:center;background:#EFEDE9;border-radius:6px;padding:9px 4px;min-width:44px;}
+  .status{font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:5px;display:inline-block;white-space:nowrap;}
+  .st-ok{background:var(--ok-soft);color:var(--ok);}
+  .st-bad{background:var(--accent-soft);color:var(--bad);}
+  .st-warn{background:var(--warn-soft);color:#7A5714;}
+  .st-none{color:#A9B4B9;}
+  @media (max-width:700px){
+    .btable thead{display:none;}
+    .btable, .btable tbody, .btable tr, .btable td{display:block;width:100%;}
+    .btable tr{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px;background:#FCFBF8;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .btable td{padding:0;}
+    .btable td[data-l]::before{content:attr(data-l);display:block;font-size:11px;font-weight:600;color:var(--ink-soft);margin-bottom:3px;}
+    .btable td.full{grid-column:1 / -1;}
+  }
+  /* stats */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+  @media (max-width:620px){.kpis{grid-template-columns:1fr 1fr;}}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px;}
+  .kpi b{display:block;font-family:var(--disp);font-size:24px;}
+  .kpi span{font-size:11.5px;color:var(--ink-soft);}
+  .banner{border-radius:8px;padding:14px 16px;font-weight:600;margin-bottom:18px;font-size:14px;}
+  .banner.ok{background:var(--ok-soft);color:var(--ok);} .banner.bad{background:var(--accent-soft);color:var(--bad);} .banner.wait{background:#EFEDE9;color:var(--ink-soft);}
+  .alert-list{margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;}
+  .stable{width:100%;border-collapse:collapse;font-size:13px;}
+  .stable th,.stable td{border-bottom:1px solid #EFEBE0;padding:8px 6px;text-align:left;}
+  .stable th{font-size:11px;text-transform:uppercase;color:var(--ink-soft);}
+  .tbl-scroll{overflow-x:auto;}
+  /* signatures */
+  .sig-wrap{border:1.5px dashed var(--line);border-radius:8px;background:#fff;position:relative;}
+  .sig-wrap canvas{width:100%;height:150px;display:block;touch-action:none;border-radius:8px;}
+  .sig-wrap .sig-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#B8C2C6;font-size:13px;pointer-events:none;}
+  .sig-actions{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px;color:var(--ink-soft);}
+  .nav-buttons{display:flex;justify-content:space-between;margin-top:26px;gap:10px;}
+  .btn{font-family:var(--body);font-weight:600;font-size:14px;padding:11px 20px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;}
+  .btn.ghost{background:none;color:var(--ink);}
+  .btn.accent{background:var(--accent);border-color:var(--accent);}
+  .btn-sm{font-family:var(--body);font-weight:600;font-size:12.5px;padding:7px 13px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;}
+  .btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+  .export-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+  .guide-step{display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid #EFEBE0;}
+  .guide-step:last-child{border-bottom:none;}
+  .guide-num{flex:none;width:42px;height:42px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--disp);font-weight:700;font-size:19px;display:flex;align-items:center;justify-content:center;}
+  .guide-step h3{margin:2px 0 6px;font-family:var(--disp);font-size:17px;}
+  .guide-step ol,.guide-step ul{margin:0;padding-left:20px;font-size:15px;line-height:1.75;}
+  .guide-go{margin-top:8px;}
+  .big-tip{font-size:16px;line-height:1.6;margin:0;}
+  .rule{display:flex;gap:12px;align-items:flex-start;font-size:15px;line-height:1.6;padding:8px 0;}
+  .rule b.n{flex:none;font-family:var(--disp);color:var(--accent);font-size:18px;}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:14px;margin:4px 0;}
+  .faq b{display:block;margin-top:12px;font-size:15px;} .faq p{margin:3px 0 0;font-size:14.5px;color:var(--ink-soft);}
+  .inline-help{font-size:13px;color:var(--ink-soft);margin:0 0 18px;} .inline-help a{color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline;}
+  body.cap-dl .word-btn{display:none;}
+  /* document */
+  .doc-preview{background:#fff;border:1px solid var(--line);padding:40px 44px;font-family:Arial, Helvetica, sans-serif;color:#111;font-size:12.5px;line-height:1.45;}
+  @media (max-width:620px){.doc-preview{padding:18px 14px;}}
+  .doc-sheet{margin-bottom:34px;}
+  .doc-sheet + .doc-sheet{border-top:2px dashed #ccc;padding-top:28px;}
+  .doc-top{display:flex;justify-content:space-between;align-items:flex-start;}
+  .doc-logo{font-family:'Arial Black', Arial, sans-serif;font-weight:900;font-size:26px;letter-spacing:.02em;}
+  .doc-logo sup{font-size:10px;}
+  .doc-title{text-align:center;margin:14px 0 16px;}
+  .doc-title span{border:1.5px solid #111;padding:3px 10px;font-weight:700;font-size:13px;}
+  .doc-preview table{width:100%;border-collapse:collapse;margin-bottom:12px;}
+  .doc-preview td,.doc-preview th{border:1px solid #444;padding:6px 8px;vertical-align:top;font-size:12px;}
+  .doc-preview th{background:#EFEFEF;text-align:left;}
+  .doc-info td:first-child{width:38%;font-weight:700;}
+  .doc-state{margin:8px 0 14px;}
+  .doc-state span{margin-right:18px;}
+  .doc-sigs{display:flex;gap:16px;margin-top:10px;}
+  .doc-sigs div{flex:1;border:1px solid #444;min-height:90px;padding:6px;text-align:center;font-size:11.5px;font-weight:700;}
+  .doc-sigs img{max-width:100%;max-height:70px;display:block;margin:4px auto;}
+  .doc-sigs .muted{display:block;margin-top:auto;padding-top:4px;}
+  .doc-sigs div{display:flex;flex-direction:column;}
+  .doc-h2{font-weight:700;font-size:13px;background:#1D4153;color:#fff;padding:5px 9px;margin:22px 0 8px;}
+  .muted{color:#666;font-size:11px;}
+  @media print{
+    .app{display:block !important;}
+    .rail,.export-bar,.nav-buttons,.topline,.page-desc,h1.page-title,.card{display:none !important;}
+    .main{padding:0;margin:0;max-width:100%;}
+    .doc-preview{border:none;padding:0;}
+    .doc-sheet{page-break-after:always;break-after:page;border-top:none !important;padding-top:0 !important;}
+    .doc-sheet:last-child{page-break-after:auto;break-after:auto;}
+    body{background:#fff;}
+    @page{margin:12mm;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail">
+    <div class="rail-brand">RGIS<sup>®</sup><span class="divider"></span><span class="product">Balisage</span></div>
+    <div class="rail-sub" id="railSub">FEUILLE DE BALISAGE CLIENT</div>
+    <ul class="steps" id="steps"></ul>
+    <div class="rail-foot">Feuille de balisage numérique.<br>Fonctionne hors connexion.<br>Les données restent sur cet appareil jusqu'à l'export.</div>
+  </nav>
+  <main class="main">
+    <div class="topline">
+      <span class="save-indicator" id="saveIndicator">✓ enregistré</span>
+      <div class="topline-actions">
+        <button class="btn-sm" onclick="downloadFilledCopy()">⬇ Télécharger une copie (fichier)</button>
+        <button class="btn-sm" onclick="resetAll()">↺ Nouvel inventaire</button>
+      </div>
+    </div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<script>
+let state = {"meta":{"date":"","badgeATL":"","enseigne":"","magasin":"","responsableRGIS":"","flowLeader":"","responsableClient":"","commentaire":"","sigFlow":"","sigClient":""},"secteurs":[],"voids":[]};
+
+let refNumber = "BAL-" + Math.random().toString(36).slice(2,6).toUpperCase();
+
+/* ---------------------------------------------------------------
+   CONSTANTES
+--------------------------------------------------------------- */
+const ETATS = [
+  {v:'Satisfait', cls:'on-ok'},
+  {v:'À revoir', cls:'on-warn'},
+  {v:'Non préparé', cls:'on-ko'}
+];
+const MOTIFS = ['Zone vide','Doublon','Zone regroupée','Erreur de pose','Autre'];
+const STEPS = [
+  {t:'Inventaire', s:'Date, enseigne, ville'},
+  {t:'Secteurs & balisage', s:'Zones par secteur'},
+  {t:'Zones voidées & rajoutées', s:'Tickets retirés et ajoutés'},
+  {t:'Validation', s:'Signatures'},
+  {t:'Export', s:'Aperçu, PDF, Word, CSV'},
+  {t:"Mode d'emploi", s:'Comment remplir la feuille'}
+];
+let currentStep = 0;
+const STORE_KEY = 'rgis-balisage-draft';
+
+/* ---------------------------------------------------------------
+   PERSISTENCE (stockage local de l'appareil, hors connexion)
+--------------------------------------------------------------- */
+let saveTimeout;
+function autosave(){
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(async ()=>{
+    const payload = JSON.stringify({state, refNumber});
+    let ok = false;
+    try{ if(window.storage && window.storage.set){ await window.storage.set(STORE_KEY, payload, false); ok = true; } }catch(e){}
+    try{ localStorage.setItem(STORE_KEY, payload); ok = true; }catch(e){}
+    if(ok){ const ind = document.getElementById('saveIndicator'); ind.classList.add('show'); setTimeout(()=>ind.classList.remove('show'), 1200); }
+  }, 400);
+}
+async function loadDraft(){
+  let raw = null;
+  try{ if(window.storage && window.storage.get){ const r = await window.storage.get(STORE_KEY, false); if(r && r.value) raw = r.value; } }catch(e){}
+  if(!raw){ try{ raw = localStorage.getItem(STORE_KEY); }catch(e){} }
+  // Une copie téléchargée contient déjà ses données : elles priment si elles existent.
+  const embedded = state.secteurs.length || state.voids.length || Object.values(state.meta).some(v=>v);
+  if(raw && !embedded){
+    try{ const p = JSON.parse(raw); state = Object.assign(state, p.state); if(p.refNumber) refNumber = p.refNumber; }catch(e){}
+  }
+}
+function resetAll(){
+  if(!confirm('Effacer toutes les données de cette feuille et commencer un nouvel inventaire ?')) return;
+  state = {meta:{date:'',badgeATL:'',enseigne:'',magasin:'',responsableRGIS:'',flowLeader:'',responsableClient:'',commentaire:'',sigFlow:'',sigClient:''},secteurs:[],voids:[]};
+  refNumber = "BAL-" + Math.random().toString(36).slice(2,6).toUpperCase();
+  autosave(); goStep(0);
+}
+
+/* ---------------------------------------------------------------
+   COPIE AUTONOME (fichier HTML contenant les données)
+--------------------------------------------------------------- */
+function downloadFilledCopy(){
+  try{
+    const scriptEl = document.querySelector('script:not([src])');
+    const original = scriptEl.textContent;
+    const a1 = original.indexOf('let state = {'), a2 = original.indexOf('let refNumber');
+    if(a1 === -1 || a2 === -1) throw new Error('bloc de données introuvable');
+    const newScript = original.slice(0,a1) + 'let state = ' + JSON.stringify(state) + ';\n\n' + original.slice(a2);
+    let html = document.documentElement.outerHTML.replace(original, newScript);
+    download('<!DOCTYPE html>\n' + html, fileBase() + '.html', 'text/html');
+    flash('✓ Copie téléchargée');
+  }catch(e){ console.error(e); alert('La copie n’a pas pu être créée.'); }
+}
+let dlCap = null;
+(async()=>{ try{ if(window.claude && window.claude.use){ dlCap = await window.claude.use('downloads'); if(dlCap) document.body.classList.add('cap-dl'); } }catch(e){} })();
+function download(content, name, type){
+  if(dlCap){
+    const data = (type==='text/csv' ? '﻿' : '') + content;
+    dlCap.save({filename:name, data}).then(()=>flash('✓ Fichier enregistré')).catch(e=>{ if(!e || e.code!=='declined') flash('Téléchargement indisponible ici'); });
+    return;
+  }
+  const blob = new Blob(type==='text/csv' || type==='application/msword' ? ['﻿', content] : [content], {type});
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+function fileBase(){
+  const m = state.meta; const d = m.date || new Date().toISOString().slice(0,10);
+  return `Balisage_${(m.magasin||'magasin').replace(/[^a-zA-Z0-9]/g,'').slice(0,30)}_${d}`;
+}
+function flash(txt){ const ind = document.getElementById('saveIndicator'); ind.textContent = txt; ind.classList.add('show'); setTimeout(()=>{ ind.classList.remove('show'); ind.textContent='✓ enregistré'; }, 1800); }
+
+/* ---------------------------------------------------------------
+   OUTILS
+--------------------------------------------------------------- */
+const uid = () => Math.random().toString(36).slice(2,9);
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function num(v){ if(v===''||v==null) return null; const n = Number(String(v).replace(/\s/g,'')); return Number.isFinite(n) ? n : null; }
+function pad(n){ return n==null ? '' : String(n).padStart(4,'0'); }
+function findSect(id){ return state.secteurs.find(s=>s.id===id); }
+function rajoutList(txt){ return String(txt||'').split(/[,;\s]+/).map(x=>x.trim()).filter(Boolean); }
+
+/* ---------------------------------------------------------------
+   CALCULS & CONTRÔLES
+--------------------------------------------------------------- */
+function rowZones(r){ const a=num(r.debut), b=num(r.fin); return (a!=null && b!=null && b>=a) ? b-a+1 : null; }
+function allRows(){ const out=[]; state.secteurs.forEach(s=>s.rangees.forEach(r=>out.push({s,r}))); return out; }
+function rowStatus(r){
+  const a=num(r.debut), b=num(r.fin);
+  if(a==null && b==null) return {cls:'st-none', txt:'—'};
+  if(a==null || b==null) return {cls:'st-warn', txt:'Zone manquante'};
+  if(b<a) return {cls:'st-bad', txt:'Dernière < 1re'};
+  const overlap = allRows().some(({r:o})=>{ if(o.id===r.id) return false; const x=num(o.debut), y=num(o.fin); return x!=null && y!=null && y>=x && x<=b && y>=a; });
+  if(overlap) return {cls:'st-bad', txt:'Chevauchement'};
+  return {cls:'st-ok', txt:'OK'};
+}
+const isRajout = v => v.type === 'rajout';
+function inRangee(z){ return allRows().some(({r})=>{ const a=num(r.debut), b=num(r.fin); return a!=null && b!=null && z>=a && z<=b; }); }
+function zoneIsBalisee(z){ return inRangee(z) || state.voids.some(v=>isRajout(v) && num(v.zone)===z); }
+function voidStatus(v){
+  const z = num(v.zone);
+  if(z==null) return v.secteurId||v.motif ? {cls:'st-warn', txt:'N° manquant'} : {cls:'st-none', txt:'—'};
+  if(state.voids.filter(o=>num(o.zone)===z && isRajout(o)===isRajout(v)).length>1) return {cls:'st-bad', txt:'Zone en double'};
+  if(!v.secteurId) return {cls:'st-warn', txt:'Secteur manquant'};
+  if(isRajout(v)){
+    if(inRangee(z)) return {cls:'st-bad', txt:'Déjà balisée'};
+    return {cls:'st-ok', txt:'OK'};
+  }
+  if(!zoneIsBalisee(z)) return {cls:'st-bad', txt:'Hors balisage'};
+  if(!v.motif) return {cls:'st-warn', txt:'Motif manquant'};
+  return {cls:'st-ok', txt:'OK'};
+}
+function sectStats(s){
+  const zones = s.rangees.reduce((t,r)=>t+(rowZones(r)||0),0);
+  const raj = state.voids.filter(v=>isRajout(v) && v.secteurId===s.id && num(v.zone)!=null).length;
+  const vd = state.voids.filter(v=>!isRajout(v) && v.secteurId===s.id && num(v.zone)!=null).length;
+  return {rangees:s.rangees.filter(r=>r.debut||r.fin).length, zones, raj, vd, aCompter: zones+raj-vd,
+          valide: !!(s.sigRGIS && s.sigClient)};
+}
+function globalStats(){
+  const t = {secteurs:state.secteurs.length, zones:0, raj:0, vd:0, aCompter:0};
+  state.secteurs.forEach(s=>{ const st=sectStats(s); t.zones+=st.zones; t.raj+=st.raj; t.vd+=st.vd; t.aCompter+=st.aCompter; });
+  const alerts = [];
+  if(!state.meta.date) alerts.push('Date de l’inventaire non renseignée');
+  if(!state.meta.magasin) alerts.push('Magasin non renseigné');
+  state.secteurs.forEach(s=>{
+    const name = s.nom || 'Secteur sans nom';
+    if(!s.nom) alerts.push('Un secteur n’a pas de nom');
+    if(!s.etat) alerts.push(`${name} : état de rangement non renseigné`);
+    else if(s.etat!=='Satisfait') alerts.push(`${name} : état de rangement « ${s.etat} »`);
+    s.rangees.forEach((r,i)=>{ const st=rowStatus(r); if(st.cls==='st-bad'||st.cls==='st-warn') alerts.push(`${name}, ligne ${i+1} : ${st.txt}`); });
+  });
+  if(state.secteurs.length && !state.meta.sigFlow) alerts.push('Signature du flow leader manquante');
+  if(state.secteurs.length && !state.meta.sigClient) alerts.push('Signature du responsable client manquante');
+  state.voids.forEach((v,i)=>{ const st=voidStatus(v); if(st.cls==='st-bad'||st.cls==='st-warn') alerts.push(`Zone ${isRajout(v)?'rajoutée':'voidée'} ${v.zone?pad(num(v.zone)):'n°'+(i+1)} : ${st.txt}`); });
+  t.alerts = alerts;
+  return t;
+}
+
+/* ---------------------------------------------------------------
+   MISE À JOUR DES DONNÉES
+--------------------------------------------------------------- */
+function upd(path, val){ const k=path.split('.'); let o=state; for(let i=0;i<k.length-1;i++) o=o[k[i]]; o[k[k.length-1]]=val; autosave(); refreshDerived(); }
+function updSect(id, key, val){ const s=findSect(id); if(!s) return; s[key]=val; autosave(); refreshDerived(); }
+function setEtat(id, v){ const s=findSect(id); s.etat = (s.etat===v ? '' : v); autosave(); renderContent(); }
+function addSect(){ state.secteurs.push({id:uid(), nom:'', badge:'', etat:'', commentaire:'', nomClient:'', sigRGIS:'', sigClient:'', rangees:[{id:uid(), rangee:'', debut:'', fin:'', rajout:''}]}); autosave(); renderContent(); }
+function removeSect(id){ const s=findSect(id); if(!confirm(`Supprimer le secteur « ${s.nom||'sans nom'} » et toutes ses zones ?`)) return;
+  state.secteurs = state.secteurs.filter(x=>x.id!==id); state.voids.forEach(v=>{ if(v.secteurId===id) v.secteurId=''; }); autosave(); renderContent(); }
+function addRow(sid){ const s=findSect(sid); const last=s.rangees[s.rangees.length-1]; const next = last && num(last.fin)!=null ? String(num(last.fin)+1) : '';
+  s.rangees.push({id:uid(), rangee:'', debut:next, fin:'', rajout:''}); autosave(); renderContent(); focusLast(next ? `[data-last-zone="${sid}"]` : `[data-first-zone="${sid}"]`); }
+function removeRow(sid, rid){ const s=findSect(sid); s.rangees = s.rangees.filter(r=>r.id!==rid); autosave(); renderContent(); }
+function updRow(sid, rid, key, val){ const r=findSect(sid).rangees.find(x=>x.id===rid); r[key]=val; autosave(); refreshDerived(); }
+function addVoid(type){ state.voids.push({id:uid(), type, secteurId: state.secteurs.length===1 ? state.secteurs[0].id : '', zone:'', motif:'', badge:'', note:''}); autosave(); renderContent(); focusLast(`[data-zone-type="${type}"]`); }
+function removeVoid(id){ state.voids = state.voids.filter(v=>v.id!==id); autosave(); renderContent(); }
+function updVoid(id, key, val){ const v=state.voids.find(x=>x.id===id); v[key]=val; autosave(); refreshDerived(); }
+function focusLast(sel){ setTimeout(()=>{ const els=document.querySelectorAll(sel); if(els.length) els[els.length-1].focus(); }, 30); }
+
+/* Met à jour les calculs affichés sans redessiner les champs (le curseur reste en place) */
+function refreshDerived(){
+  allRows().forEach(({s,r})=>{
+    const z=document.getElementById('z-'+r.id); if(z) z.textContent = rowZones(r) ?? '—';
+    const st=document.getElementById('st-'+r.id); if(st){ const x=rowStatus(r); st.className='status '+x.cls; st.textContent=x.txt; }
+  });
+  state.secteurs.forEach(s=>{ const el=document.getElementById('tot-'+s.id); if(el){ const st=sectStats(s); el.textContent = `${st.zones} zones · ${st.raj} rajout(s)`; } });
+  state.voids.forEach(v=>{ const el=document.getElementById('vs-'+v.id); if(el){ const x=voidStatus(v); el.className='status '+x.cls; el.textContent=x.txt; } });
+  const sub=document.getElementById('railSub'); if(sub) sub.textContent = state.meta.magasin ? ('BALISAGE · '+state.meta.magasin.toUpperCase().slice(0,28)) : 'FEUILLE DE BALISAGE CLIENT';
+}
+
+/* ---------------------------------------------------------------
+   NAVIGATION
+--------------------------------------------------------------- */
+function renderRail(){
+  document.getElementById('steps').innerHTML = STEPS.map((s,i)=>`
+    <li><button class="step-btn ${i===currentStep?'active':''}" onclick="goStep(${i})">
+      <span class="num">${i+1}</span><span class="lbl">${s.t}<small>${s.s}</small></span></button></li>`).join('');
+}
+function goStep(i){ currentStep=i; renderRail(); renderContent(); window.scrollTo({top:0, behavior:'smooth'}); }
+function navButtons(){
+  return `<div class="nav-buttons">
+    <button class="btn ghost" ${currentStep===0?'disabled style="visibility:hidden"':''} onclick="goStep(${currentStep-1})">← Précédent</button>
+    ${currentStep<STEPS.length-1?`<button class="btn" onclick="goStep(${currentStep+1})">Suivant →</button>`:''}
+  </div>`;
+}
+function field(label, path, val, type='text', ph=''){
+  return `<div class="field"><label>${label}</label><input type="${type}" value="${esc(val)}" placeholder="${esc(ph)}" oninput="upd('${path}', this.value)"></div>`;
+}
+
+/* ---------------------------------------------------------------
+   ÉTAPE 1 — INVENTAIRE
+--------------------------------------------------------------- */
+function renderInfos(){
+  const m=state.meta;
+  return `<h1 class="page-title">Inventaire</h1>
+  <p class="page-desc">Informations communes à toutes les feuilles de balisage de cet inventaire. À remplir une seule fois.</p>
+  <p class="inline-help">Première utilisation ? <a onclick="goStep(5)">Lisez le mode d'emploi (onglet 6)</a>.</p>
+  <div class="card"><h2>En-tête de la feuille</h2><p class="hint">Reprend l'en-tête de la feuille de balisage client papier.</p>
+    <div class="grid2">${field('Date','meta.date',m.date,'date')}${field('Badge ATL','meta.badgeATL',m.badgeATL,'text','N° de badge')}</div>
+    ${field('Enseigne','meta.enseigne',m.enseigne,'text','Ex. : Auchan, Leroy Merlin…')}
+    ${field('Nom de la ville','meta.magasin',m.magasin,'text','Ex. : Nantes')}
+    ${field('Nom du responsable RGIS','meta.responsableRGIS',m.responsableRGIS)}
+    ${field('Nom du flow leader RGIS','meta.flowLeader',m.flowLeader)}
+    <div class="field"><label>Commentaire général</label><textarea oninput="upd('meta.commentaire', this.value)">${esc(m.commentaire)}</textarea></div>
+  </div>${navButtons()}`;
+}
+
+/* ---------------------------------------------------------------
+   ÉTAPE 2 — SECTEURS & BALISAGE
+--------------------------------------------------------------- */
+function sectCard(s, idx){
+  const st = sectStats(s);
+  return `<div class="card">
+    <div class="card-head">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="sect-badge">SECTEUR ${idx+1}</span><span class="muted" id="tot-${s.id}">${st.zones} zones · ${st.raj} rajout(s)</span></div>
+      <button class="row-remove" onclick="removeSect('${s.id}')">✕ supprimer le secteur</button>
+    </div>
+    <div class="field"><label>Secteur de balisage</label><input type="text" value="${esc(s.nom)}" placeholder="Ex. : Réserve, Rayon frais…" oninput="updSect('${s.id}','nom',this.value)"></div>
+    <div class="field"><label>État de rangement lors du balisage du secteur</label>
+      <div class="pillgroup">${ETATS.map(e=>`<span class="pill ${s.etat===e.v?e.cls:''}" onclick="setEtat('${s.id}','${e.v}')">${e.v}</span>`).join('')}</div>
+    </div>
+    <label style="margin-top:6px">Balisage</label>
+    <table class="btable"><thead><tr><th>1re zone</th><th>Dernière zone</th><th>Nb zones</th><th>Contrôle</th></tr></thead><tbody>
+    ${s.rangees.map(r=>{ const x=rowStatus(r); return `<tr>
+      <td data-l="1re zone"><input type="number" inputmode="numeric" data-first-zone="${s.id}" value="${esc(r.debut)}" oninput="updRow('${s.id}','${r.id}','debut',this.value)"></td>
+      <td data-l="Dernière zone"><input type="number" inputmode="numeric" data-last-zone="${s.id}" value="${esc(r.fin)}" oninput="updRow('${s.id}','${r.id}','fin',this.value)"></td>
+      <td data-l="Nb zones"><div class="calc" id="z-${r.id}">${rowZones(r) ?? '—'}</div></td>
+      <td data-l="Contrôle"><span id="st-${r.id}" class="status ${x.cls}">${x.txt}</span></td>
+    </tr>`; }).join('')}
+    </tbody></table>
+    <div class="field" style="margin-top:14px"><label>Commentaire sur le secteur</label><textarea oninput="updSect('${s.id}','commentaire',this.value)">${esc(s.commentaire)}</textarea></div>
+  </div>`;
+}
+function renderBalisage(){
+  return `<h1 class="page-title">Secteurs & balisage</h1>
+  <p class="page-desc">Une carte par secteur. Pour chaque secteur, écrivez la 1re zone et la dernière zone : le nombre de zones se calcule tout seul.</p>
+  ${state.secteurs.length ? state.secteurs.map(sectCard).join('') : `<div class="card"><p class="hint" style="margin:0">Aucun secteur pour l'instant. Ajoutez le premier secteur à baliser.</p></div>`}
+  <button class="add-btn strong" onclick="addSect()">+ Ajouter un secteur</button>
+  ${navButtons()}`;
+}
+
+/* ---------------------------------------------------------------
+   ÉTAPE 3 — ZONES VOIDÉES & RAJOUTÉES
+--------------------------------------------------------------- */
+function extraTable(type){
+  const opts = (sel)=>`<option value="">— choisir —</option>` + state.secteurs.map(s=>`<option value="${s.id}" ${sel===s.id?'selected':''}>${esc(s.nom||'Secteur sans nom')}</option>`).join('');
+  const list = state.voids.filter(v=> type==='rajout' ? isRajout(v) : !isRajout(v));
+  const voidee = type!=='rajout';
+  return `<table class="btable"><thead><tr><th>Secteur</th><th>N° de zone</th>${voidee?'<th>Motif</th>':'<th>Commentaire</th>'}<th>Contrôle</th><th></th></tr></thead><tbody>
+    ${list.map(v=>{ const x=voidStatus(v); return `<tr>
+      <td data-l="Secteur" class="full"><select onchange="updVoid('${v.id}','secteurId',this.value)">${opts(v.secteurId)}</select></td>
+      <td data-l="N° de zone"><input type="number" inputmode="numeric" data-zone-type="${type}" value="${esc(v.zone)}" oninput="updVoid('${v.id}','zone',this.value)"></td>
+      ${voidee
+        ? `<td data-l="Motif"><select onchange="updVoid('${v.id}','motif',this.value)"><option value="">— motif —</option>${MOTIFS.map(m=>`<option ${v.motif===m?'selected':''}>${m}</option>`).join('')}</select></td>`
+        : `<td data-l="Commentaire"><input type="text" value="${esc(v.note)}" placeholder="Facultatif" oninput="updVoid('${v.id}','note',this.value)"></td>`}
+      <td data-l="Contrôle"><span id="vs-${v.id}" class="status ${x.cls}">${x.txt}</span></td>
+      <td class="full" style="text-align:right"><button class="row-remove" onclick="removeVoid('${v.id}')">✕</button></td>
+    </tr>`; }).join('')}
+    </tbody></table>
+    ${list.length?'':`<p class="hint">Aucune zone ${voidee?'voidée':'rajoutée'} pour l’instant.</p>`}
+    <button class="add-btn" onclick="addVoid('${type}')">+ Ajouter une zone ${voidee?'voidée':'rajoutée'}</button>`;
+}
+function renderVoids(){
+  return `<h1 class="page-title">Zones voidées & rajoutées</h1>
+  <p class="page-desc">Enregistrez ici les zones retirées (voidées) et les zones ajoutées (rajoutées) lors de la validation du balisage, avec le secteur concerné.</p>
+  <div class="card"><h2>Zones voidées</h2><p class="hint">Zones retirées ou annulées. Le ticket physique va ensuite dans la pochette de collecte.</p>${extraTable('voidee')}</div>
+  <div class="card"><h2>Zones rajoutées</h2><p class="hint">Zones ajoutées en dehors des zones déjà balisées, avec le secteur dans lequel le rajout a été fait.</p>${extraTable('rajout')}</div>
+  ${navButtons()}`;
+}
+
+/* ---------------------------------------------------------------
+   ÉTAPE 4 — VALIDATION / SIGNATURES (une signature globale par personne)
+--------------------------------------------------------------- */
+function sigBlock(key, label){
+  const v = state.meta[key];
+  return `<div><label>${label}</label>
+    <div class="sig-wrap"><canvas data-key="${key}"></canvas>${v?'':'<div class="sig-ph">Signer ici avec le doigt</div>'}</div>
+    <div class="sig-actions"><span>${v?'✔ Signature enregistrée':'Non signé'}</span><button class="row-remove" onclick="clearSig('${key}')">Effacer</button></div></div>`;
+}
+function renderValidation(){
+  const m = state.meta;
+  return `<h1 class="page-title">Validation</h1>
+  <p class="page-desc">Une seule signature pour tout le balisage : celle du flow leader RGIS et celle du responsable client. Signez au doigt dans les cadres.</p>
+  <div class="card">
+    <div class="grid2">
+      <div class="field"><label>Flow leader RGIS</label><input type="text" value="${esc(m.flowLeader)}" placeholder="Nom du flow leader" oninput="upd('meta.flowLeader',this.value)"></div>
+      <div class="field"><label>Responsable client</label><input type="text" value="${esc(m.responsableClient)}" placeholder="Nom du responsable client" oninput="upd('meta.responsableClient',this.value)"></div>
+    </div>
+    <div class="grid2">${sigBlock('sigFlow','Signature — Flow leader RGIS')}${sigBlock('sigClient','Signature — Responsable client')}</div>
+  </div>
+  ${navButtons()}`;
+}
+function initSignatures(){
+  document.querySelectorAll('canvas[data-key]').forEach(cv=>{
+    const key = cv.dataset.key;
+    const ratio = window.devicePixelRatio || 1; const w = cv.clientWidth, h = cv.clientHeight;
+    cv.width = w*ratio; cv.height = h*ratio; const ctx = cv.getContext('2d'); ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#1D4153';
+    if(state.meta[key]){ const img = new Image(); img.onload = ()=>ctx.drawImage(img,0,0,w,h); img.src = state.meta[key]; }
+    let drawing=false, last=null;
+    const pos = e=>{ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; };
+    cv.addEventListener('pointerdown', e=>{ drawing=true; last=pos(e); cv.setPointerCapture(e.pointerId); const ph=cv.parentElement.querySelector('.sig-ph'); if(ph) ph.remove(); });
+    cv.addEventListener('pointermove', e=>{ if(!drawing) return; const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; });
+    const end = ()=>{ if(!drawing) return; drawing=false; state.meta[key] = cv.toDataURL('image/png'); autosave();
+      const lab = cv.parentElement.nextElementSibling.querySelector('span'); if(lab) lab.textContent='✔ Signature enregistrée'; };
+    cv.addEventListener('pointerup', end); cv.addEventListener('pointerleave', end); cv.addEventListener('pointercancel', end);
+  });
+}
+function clearSig(key){ state.meta[key]=''; autosave(); renderContent(); }
+
+/* ---------------------------------------------------------------
+   ÉTAPE 5 — DOCUMENT & EXPORTS
+--------------------------------------------------------------- */
+function buildDocumentHTML(){
+  const m = state.meta; const g = globalStats();
+  if(!state.secteurs.length) return '<p class="muted">Aucun secteur saisi.</p>';
+  const etatTxt = e => e ? e.toUpperCase() : '';
+  let body = '';
+  state.secteurs.forEach(s=>{
+    const st = sectStats(s);
+    const rows = s.rangees.filter(r=>r.debut||r.fin);
+    const list = rows.length ? rows : [{}];
+    list.forEach((r,i)=>{
+      body += `<tr><td>${i===0?`<b>${esc(s.nom)}</b>`:''}</td><td>${i===0?etatTxt(s.etat):''}</td><td>${pad(num(r.debut))}</td><td>${pad(num(r.fin))}</td><td style="text-align:center">${rowZones(r) ?? ''}</td>`
+            + (i===0 ? `<td style="text-align:center" rowspan="${list.length}">${st.raj}</td><td style="text-align:center" rowspan="${list.length}">${st.vd}</td><td style="text-align:center" rowspan="${list.length}"><b>${st.aCompter}</b></td>` : '')
+            + `</tr>`;
+    });
+  });
+  const extra = state.voids.filter(v=>num(v.zone)!=null);
+  const rajs = extra.filter(isRajout), voids = extra.filter(v=>!isRajout(v));
+  const sName = id => esc((findSect(id)||{}).nom || '');
+  return `<div class="doc-sheet">
+      <div class="doc-top"><div class="doc-logo">RGIS<sup>®</sup></div><div>Badge ATL : <b>${esc(m.badgeATL)}</b></div></div>
+      <div class="doc-title"><span>FEUILLE DE BALISAGE CLIENT</span></div>
+      <table class="doc-info">
+        <tr><td>DATE</td><td>${esc(m.date ? m.date.split('-').reverse().join('/') : '')}</td></tr>
+        <tr><td>ENSEIGNE</td><td>${esc(m.enseigne)}</td></tr>
+        <tr><td>VILLE</td><td>${esc(m.magasin)}</td></tr>
+        <tr><td>NOM DU RESPONSABLE RGIS</td><td>${esc(m.responsableRGIS)}</td></tr>
+        <tr><td>NOM DU FLOW LEADER RGIS</td><td>${esc(m.flowLeader)}</td></tr>
+      </table>
+      <table><thead><tr><th>SECTEUR</th><th>ÉTAT DE RANGEMENT</th><th>1ÈRE ZONE</th><th>DERNIÈRE ZONE</th><th>NB ZONES</th><th>RAJOUTÉES</th><th>VOIDÉES</th><th>À COMPTER</th></tr></thead>
+      <tbody>${body}</tbody>
+      <tfoot><tr><th colspan="4" style="text-align:right">TOTAL</th><th style="text-align:center">${g.zones}</th><th style="text-align:center">${g.raj}</th><th style="text-align:center">${g.vd}</th><th style="text-align:center">${g.aCompter}</th></tr></tfoot></table>
+      ${rajs.length?`<table><thead><tr><th colspan="3">ZONES RAJOUTÉES</th></tr><tr><th>Secteur</th><th>N° de zone</th><th>Commentaire</th></tr></thead><tbody>${rajs.map(v=>`<tr><td>${sName(v.secteurId)}</td><td>${pad(num(v.zone))}</td><td>${esc(v.note)}</td></tr>`).join('')}</tbody></table>`:''}
+      ${voids.length?`<table><thead><tr><th colspan="3">ZONES VOIDÉES</th></tr><tr><th>Secteur</th><th>N° de zone</th><th>Motif</th></tr></thead><tbody>${voids.map(v=>`<tr><td>${sName(v.secteurId)}</td><td>${pad(num(v.zone))}</td><td>${esc(v.motif)}</td></tr>`).join('')}</tbody></table>`:''}
+      ${state.secteurs.filter(s=>s.commentaire).map(s=>`<p><b>Commentaire — ${esc(s.nom)} :</b> ${esc(s.commentaire)}</p>`).join('')}
+      ${m.commentaire?`<p><b>Commentaire général :</b> ${esc(m.commentaire)}</p>`:''}
+      <div class="doc-sigs">
+        <div>SIGNATURE — FLOW LEADER RGIS${m.sigFlow?`<img src="${m.sigFlow}" alt="">`:''}<span class="muted">${esc(m.flowLeader)}</span></div>
+        <div>SIGNATURE — RESPONSABLE CLIENT${m.sigClient?`<img src="${m.sigClient}" alt="">`:''}<span class="muted">${esc(m.responsableClient)}</span></div>
+      </div>
+      <p class="muted">Réf. ${refNumber} · document généré le ${new Date().toLocaleDateString('fr-FR')} · ${g.alerts.length?g.alerts.length+' alerte(s) non résolue(s) au moment de l’export':'aucune alerte'}</p>
+    </div>`;
+}
+function renderExport(){
+  const g = globalStats();
+  return `<h1 class="page-title">Aperçu & export</h1>
+  <p class="page-desc">La feuille de balisage client récapitulative : tous les secteurs dans un seul tableau. Enregistrez-la en PDF, puis déposez-la dans le dossier Drive de l'inventaire.</p>
+  ${g.alerts.length?`<div class="banner bad">⚠ ${g.alerts.length} alerte(s) non résolue(s) — voir les contrôles dans les onglets de saisie.</div>`:''}
+  <div class="export-bar">
+    <button class="btn accent" onclick="window.print()">🖨 Imprimer / Enregistrer en PDF</button>
+    <button class="btn ghost word-btn" onclick="exportWord()">⬇ Word (.doc)</button>
+    <button class="btn ghost" onclick="exportCSV()">⬇ Tableur (.csv)</button>
+    <button class="btn ghost" onclick="downloadFilledCopy()">⬇ Copie modifiable (.html)</button>
+  </div>
+  <div class="doc-preview" id="docPreview">${buildDocumentHTML()}</div>
+  ${navButtons()}`;
+}
+function exportWord(){
+  const pre = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><title>Balisage</title>"
+   + "<style>body{font-family:Arial,sans-serif;font-size:11pt;} table{width:100%;border-collapse:collapse;margin-bottom:10px;} td,th{border:1px solid #444;padding:5px 7px;font-size:10pt;} th{background:#EFEFEF;text-align:left;} .doc-logo{font-size:20pt;font-weight:900;} .doc-title{text-align:center;font-weight:bold;margin:10px 0;} .doc-sheet{page-break-after:always;} .doc-sigs div{border:1px solid #444;padding:6px;margin-bottom:6px;} .doc-sigs img{height:60px;} .muted{color:#666;font-size:9pt;} .doc-h2{background:#1D4153;color:#fff;padding:5px;font-weight:bold;}</style></head><body>";
+  download(pre + buildDocumentHTML() + "</body></html>", fileBase() + '.doc', 'application/msword');
+}
+function exportCSV(){
+  const q = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+  const m = state.meta; const lines = [];
+  lines.push(['Type','Date','Enseigne','Ville','Badge ATL','Flow leader','Secteur','État de rangement','1re zone','Dernière zone','Nb zones','N° de zone','Motif / commentaire','Contrôle'].map(q).join(';'));
+  state.secteurs.forEach(s=>s.rangees.forEach(r=>{ if(!(r.debut||r.fin)) return;
+    lines.push(['Balisage',m.date,m.enseigne,m.magasin,m.badgeATL,m.flowLeader,s.nom,s.etat,r.debut,r.fin,rowZones(r)??'','','',rowStatus(r).txt].map(q).join(';')); }));
+  state.voids.forEach(v=>{ if(num(v.zone)==null) return; const s=findSect(v.secteurId)||{};
+    lines.push([isRajout(v)?'Zone rajoutée':'Zone voidée',m.date,m.enseigne,m.magasin,m.badgeATL,m.flowLeader,s.nom||'',s.etat||'','','','',v.zone,isRajout(v)?v.note:v.motif,voidStatus(v).txt].map(q).join(';')); });
+  download(lines.join('\r\n'), fileBase() + '.csv', 'text/csv');
+}
+
+/* ---------------------------------------------------------------
+   ÉTAPE 6 — MODE D'EMPLOI
+--------------------------------------------------------------- */
+function renderGuide(){
+  const step = (n, title, items, go) => `<div class="guide-step"><div class="guide-num">${n}</div><div><h3>${title}</h3><ol>${items.map(i=>`<li>${i}</li>`).join('')}</ol>${go!=null?`<button class="btn-sm guide-go" onclick="goStep(${go})">Aller à cet onglet →</button>`:''}</div></div>`;
+  return `<h1 class="page-title">Mode d'emploi</h1>
+  <p class="page-desc">Tout ce qu'il faut savoir pour remplir la feuille de balisage, en 5 minutes.</p>
+  <div class="card"><h2>En bref</h2>
+    <p class="big-tip">Cette page <b>remplace la feuille de balisage papier</b>. Vous remplissez les onglets <b>1 à 4</b> dans l'ordre, puis vous <b>enregistrez en PDF</b> à l'onglet 5. Ça marche <b>même sans internet</b>, et tout s'enregistre tout seul.</p>
+  </div>
+  <div class="card"><h2>Avant de commencer</h2>
+    <p class="big-tip">En haut de la page, appuyez sur <b>« ↺ Nouvel inventaire »</b> pour avoir une feuille vide.</p>
+  </div>
+  <div class="card"><h2>Étape par étape</h2>
+    ${step(1,'Inventaire',[
+      'Choisissez la <b>date</b>.',
+      'Écrivez votre <b>badge ATL</b>.',
+      "Écrivez l'<b>enseigne</b> (exemple : Auchan) et la <b>ville</b>.",
+      'Écrivez le nom du <b>responsable RGIS</b> et du <b>flow leader</b>.'],0)}
+    ${step(2,'Secteurs & balisage',[
+      'Appuyez sur <b>« + Ajouter un secteur »</b>.',
+      'Écrivez le <b>nom du secteur</b> (exemple : Réserve).',
+      "Touchez l'<b>état de rangement</b> : Satisfait, À revoir ou Non préparé.",
+      'Écrivez la <b>1re zone</b> et la <b>dernière zone</b>. Le nombre de zones se calcule tout seul.',
+      'Recommencez pour <b>chaque secteur</b>.'],1)}
+    ${step(3,'Zones voidées & rajoutées',[
+      'Une zone <b>retirée</b> ? Appuyez sur <b>« + Ajouter une zone voidée »</b>, choisissez le secteur, écrivez le numéro et choisissez le motif.',
+      'Une zone <b>ajoutée</b> ? Appuyez sur <b>« + Ajouter une zone rajoutée »</b>, choisissez le secteur et écrivez le numéro.',
+      'Aucune zone voidée ou rajoutée ? <b>Passez directement à l’étape 4.</b>'],2)}
+    ${step(4,'Validation',[
+      'Le <b>flow leader</b> signe avec le doigt dans le premier cadre.',
+      'Le <b>responsable client</b> signe dans le deuxième cadre.',
+      'Signature ratée ? Appuyez sur <b>« Effacer »</b> et recommencez.'],3)}
+    ${step(5,'Export',[
+      'Appuyez sur <b>« Imprimer / Enregistrer en PDF »</b>.',
+      'Choisissez <b>« Enregistrer au format PDF »</b>.',
+      "Déposez le PDF dans le <b>dossier Drive</b> de l'inventaire."],4)}
+  </div>
+  <div class="card"><h2>Les couleurs</h2>
+    <div class="legend"><span class="status st-ok">OK</span> c'est bon</div>
+    <div class="legend"><span class="status st-warn">Zone manquante</span> il manque une information</div>
+    <div class="legend"><span class="status st-bad">Chevauchement</span> erreur à corriger</div>
+  </div>
+  <div class="card"><h2>Les 3 règles d'or</h2>
+    <div class="rule"><b class="n">1</b><span><b>Une feuille vide à chaque inventaire</b> : appuyez sur « ↺ Nouvel inventaire ».</span></div>
+    <div class="rule"><b class="n">2</b><span><b>Pas besoin d'enregistrer</b> : tout s'enregistre tout seul (« ✓ enregistré » apparaît en haut).</span></div>
+    <div class="rule"><b class="n">3</b><span><b>Faites le PDF avant de quitter le magasin.</b> Sinon, la feuille reste uniquement sur l'appareil.</span></div>
+  </div>
+  <div class="card faq"><h2>Questions fréquentes</h2>
+    <b>Je me suis trompé dans un chiffre.</b><p>Corrigez simplement la case : tout se recalcule.</p>
+    <b>Je n'ai pas de réseau dans le magasin.</b><p>Aucun problème : la feuille fonctionne sans internet.</p>
+    <b>J'ai fermé la page.</b><p>Rouvrez-la sur le même appareil : vos saisies sont toujours là.</p>
+    <b>J'ai supprimé un secteur par erreur.</b><p>Il faut le ressaisir : appuyez sur « + Ajouter un secteur ».</p>
+  </div>
+  ${navButtons()}`;
+}
+
+/* ---------------------------------------------------------------
+   RENDU
+--------------------------------------------------------------- */
+function renderContent(){
+  const views = [renderInfos, renderBalisage, renderVoids, renderValidation, renderExport, renderGuide];
+  document.getElementById('content').innerHTML = views[currentStep]();
+  if(currentStep===3) initSignatures();
+  refreshDerived();
+}
+async function init(){ await loadDraft(); renderRail(); renderContent(); }
+window.addEventListener('resize', ()=>{ if(currentStep===3){ clearTimeout(window._rz); window._rz=setTimeout(renderContent,250); } });
+init();
+</script>
+</body></html>
